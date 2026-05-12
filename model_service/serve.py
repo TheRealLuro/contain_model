@@ -14,7 +14,7 @@ model = nn.Sequential(
 
 # Load weights
 model.load_state_dict(
-    torch.load("model/iris_model.pt", map_location=torch.device("cpu"))
+    torch.load("model/iris_model.pt", map_location=torch.device("gpu" if torch.cuda.is_available() else "cpu"))
 )
 
 model.eval()
