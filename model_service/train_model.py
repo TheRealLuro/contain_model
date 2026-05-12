@@ -38,12 +38,13 @@ model = nn.Sequential(
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
-# Train
-for epoch in range(100):
+# Train - 1000 because I said and I dont care
+for epoch in range(1000):
     optimizer.zero_grad()
 
     outputs = model(X_train)
     loss = criterion(outputs, y_train)
+    print(f"Epoch {epoch+1}/1000 - Loss: {criterion(outputs, y_train).item():.4f}")
 
     loss.backward()
     optimizer.step()
