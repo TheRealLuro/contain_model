@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Flower Predictor</title>
+
+  <style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, #0b1220, #050814);
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .card {
+      width: 420px;
+      background: rgba(17, 24, 39, 0.9);
+      padding: 30px;
+      border-radius: 22px;
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(255,255,255,0.04);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 22px;
+    }
+
+    .label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin: 12px 0 8px;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      background: #0f172a;
+      color: white;
+      outline: none;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 12px;
+      background:
+        linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 15px;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .result {
+      margin-top: 22px;
+      padding: 18px;
+      background: #0f172a;
+      border-radius: 14px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid #1e293b;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #1d4ed8;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      align-self: center;
+    }
+
+    .prediction-text {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .confidence-text {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .confidence-bar {
+      width: 100%;
+      height: 10px;
+      background: #1f2937;
+      border-radius: 999px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      width: 0%;
+      background:
+        linear-gradient(90deg, #22c55e, #3b82f6);
+      transition: width 0.4s ease;
+    }
+
+    .loading {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>AI Flower Predictor</h1>
+
+  <div class="subtitle">
+    Multi-container ML inference with FastAPI + Docker
+  </div>
+
+  <div class="row">
+
+    <div>
+      <div class="label">Sepal Length</div>
+      <input id="f1" type="number" step="any" placeholder="5.1">
+    </div>
+
+    <div>
+      <div class="label">Sepal Width</div>
+      <input id="f2" type="number" step="any" placeholder="3.5">
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div>
+      <div class="label">Petal Length</div>
+      <input id="f3" type="number" step="any" placeholder="1.4">
+    </div>
+
+    <div>
+      <div class="label">Petal Width</div>
+      <input id="f4" type="number" step="any" placeholder="0.2">
+    </div>
+
+  </div>
+
+  <button id="btn" onclick="predict()">
+    Run Prediction
+  </button>
+
+  <div class="result" id="result">
+    Prediction result will appear here
+  </div>
+
+  <div class="footer">
+    Powered by Docker • FastAPI • PyTorch
+  </div>
+
+</div>
+
+<script>
+
+async function predict() {
+
+  const btn = document.getElementById("btn");
+  const result = document.getElementById("result");
+
+  const features = [
+    parseFloat(document.getElementById("f1").value),
+    parseFloat(document.getElementById("f2").value),
+    parseFloat(document.getElementById("f3").value),
+    parseFloat(document.getElementById("f4").value)
+  ];
+
+  if (features.some(v => isNaN(v))) {
+    result.innerHTML = "Please fill all fields";
+    return;
+  }
+
+  btn.disabled = true;
+  result.innerHTML = `<div class="loading">Thinking...</div>`;
+
+  try {
+
+    const res = await fetch("http://localhost:8000/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ features })
+    });
+
+    const data = await res.json();
+
+    // backend returns: { prediction, model }
+    const prediction = data.prediction;
+
+    const labels = {
+      0: "Setosa ",
+      1: "Versicolor ",
+      2: "Virginica "
+    };
+
+    const name = labels[prediction] || "Unknown";
+
+    result.innerHTML = `
+      <div class="badge">${name}</div>
+      <div style="font-size:13px; color:#9ca3af;">
+        Model: ${data.model}
+      </div>
+    `;
+
+  } catch (err) {
+    result.innerHTML = "Error calling API (is backend running?)";
+  }
+
+  btn.disabled = false;
+}
+
+</script>
+
+</body>
+</html>
